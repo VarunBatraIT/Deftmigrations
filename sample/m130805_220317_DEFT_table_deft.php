@@ -1,6 +1,6 @@
 <?php
 
-class m130805_220317_DEFT_table_deft extends CDbMigration
+class m130805_222308_DEFT_table_deft extends CDbMigration
 {
 	public function up()
 	{
@@ -16,12 +16,12 @@ Try{
 $i++;
 $toInsert[$i]['id'] = '1'; 
 $toInsert[$i]['id2'] = '1'; 
-$toInsert[$i]['text'] = 'text2'; 
+$toInsert[$i]['text'] = 'text1'; 
 
 $i++;
 $toInsert[$i]['id'] = '1'; 
 $toInsert[$i]['id2'] = '2'; 
-$toInsert[$i]['text'] = 'text1'; 
+$toInsert[$i]['text'] = 'text2'; 
 
 foreach($toInsert as $insertRow){ 
 $this->insert('table_deft', $insertRow);
@@ -43,7 +43,7 @@ Yii::app()->db->createCommand($sql)->execute();
 
 	public function down()
 	{
-		echo "m130805_220317_DEFT_table_deft does not support migration down.\n";
+		echo "m130805_222308_DEFT_table_deft does not support migration down.\n";
 		return false;
 	}
 

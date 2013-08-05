@@ -1,6 +1,6 @@
 <?php
 
-class m130805_220313_DEFT_table_deft extends CDbMigration
+class m130805_222304_DEFT_table_deft extends CDbMigration
 {
 	public function up()
 	{
@@ -8,14 +8,14 @@ class m130805_220313_DEFT_table_deft extends CDbMigration
     "id"=>"int(2) NOT NULL",
     "id2"=>"int(11) NOT NULL AUTO_INCREMENT",
     "text"=>"varchar(230)",
-"PRIMARY KEY (id,id2)"), " DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
+"PRIMARY KEY (id2,id)"), " DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci");
 
 
 	}
 
 	public function down()
 	{
-		echo "m130805_220313_DEFT_table_deft does not support migration down.\n";
+		echo "m130805_222304_DEFT_table_deft does not support migration down.\n";
 		return false;
 	}
 

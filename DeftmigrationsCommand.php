@@ -23,6 +23,7 @@ class DeftmigrationsCommand extends MigrateCommand
 
     public $table, $database, $fks;
     public $skipTables = array();
+    private $autoIncrement;
 
     public function beforeAction($action, $params)
     {
@@ -48,7 +49,7 @@ class DeftmigrationsCommand extends MigrateCommand
             AND T.table_schema = "' . $curdb . '"
             AND T.table_name = "' . $tableName . '";
             SHOW CHARACTER SET FOR ' . $curdb . '.' . $tableName
-                )->queryRow();
+        )->queryRow();
         return $results;
     }
 
@@ -171,6 +172,7 @@ class DeftmigrationsCommand extends MigrateCommand
             $result .= " DEFAULT '{$col->defaultValue}'";
         }
         if ($col->autoIncrement) {
+            $this->autoIncrement = $col->name;
             $result .= " AUTO_INCREMENT";
         }
         return $result;
@@ -223,16 +225,16 @@ class DeftmigrationsCommand extends MigrateCommand
     private function getTableDump($table)
     {
         $tableDump = "\n" .
-                '$i=0;' .
-                "\n" .
-                '$sql = \'SET foreign_key_checks = 0\';' .
-                "\n" .
-                'Yii::app()->db->createCommand($sql)->execute();' .
-                "\n" .
-                '$sql = \'SET foreign_key_checks = 1\';' .
-                "\n" .
-                "Try{" .
-                "\n";
+            '$i=0;' .
+            "\n" .
+            '$sql = \'SET foreign_key_checks = 0\';' .
+            "\n" .
+            'Yii::app()->db->createCommand($sql)->execute();' .
+            "\n" .
+            '$sql = \'SET foreign_key_checks = 1\';' .
+            "\n" .
+            "Try{" .
+            "\n";
 
         $data = Yii::app()->db->createCommand()->select()->from($table)->queryAll();
         if (!$data) {
@@ -249,23 +251,23 @@ class DeftmigrationsCommand extends MigrateCommand
         }
         $tableDump .= '
 foreach($toInsert as $insertRow){ ' . "\n" .
-                '$this->insert(\'' . $table . '\', $insertRow);' . "\n" . '
+            '$this->insert(\'' . $table . '\', $insertRow);' . "\n" . '
 }' . "\n\n" . '
 unset($toInsert);
         ' . "\n" .
-                '}Catch(Exception $e){' .
-                "\n" .
-                'Yii::app()->db->createCommand($sql)->execute();' .
-                "\n" .
-                'echo \'Sorry got some error\';' .
-                "\n" .
-                'return false;' .
-                "\n" .
-                "}" .
-                "\n" .
-                'Yii::app()->db->createCommand($sql)->execute();' .
-                "\n" .
-                "\n";
+            '}Catch(Exception $e){' .
+            "\n" .
+            'Yii::app()->db->createCommand($sql)->execute();' .
+            "\n" .
+            'echo \'Sorry got some error\';' .
+            "\n" .
+            'return false;' .
+            "\n" .
+            "}" .
+            "\n" .
+            'Yii::app()->db->createCommand($sql)->execute();' .
+            "\n" .
+            "\n";
 
         return $tableDump;
     }
@@ -295,10 +297,15 @@ unset($toInsert);
         }
 
         $result .= '$this->createTable("' . $def->name . '", array(' . "\n";
+        $this->autoIncrement = false;
         foreach ($def->columns as $col) {
             $result .= '    "' . $col->name . '"=>"' . $this->getColType($col, $findKey) . '",' . "\n";
         }
         if ($findKey === false && is_array($primary_keys)) {
+            if ($this->autoIncrement !== false) {
+                $primary_keys = array_diff($primary_keys, array($this->autoIncrement));
+                array_unshift($primary_keys, $this->autoIncrement);
+            }
             $result .= '"PRIMARY KEY (' . implode(',', $primary_keys) . ')"';
         }
         $result .= '), " DEFAULT CHARACTER SET ' . $character['character_set_name'] . ' COLLATE ' . $character['table_collation'] . '");' . "\n\n";
