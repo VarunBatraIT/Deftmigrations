@@ -2,8 +2,7 @@ Deftmigrations
 ==============
 
 Deftmigrations is coded to be used with Yii framework to generate migration files for table structure and or table data in other words, it can dump whole database.
-This reduces manual work of Yii developers by generating migrations containing table schema and/or table data. It can also be used to generate Database dump in Yii Migration format.
-
+This reduces manual work of Yii developers.
 You can entirely replace Yii default migration and use this one. In case you don't want to do it, just copy this class in protected\commands folder. It should be available automatically.
 
 ##Following commands are available:
