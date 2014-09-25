@@ -118,13 +118,13 @@ class DeftmigrationsCommand extends MigrateCommand
         if (count($this->fks) > 0) {
             echo "\n" . 'Waiting for 2 seconds to write Fks' . "\n";
             sleep(2);
-        }
-        foreach ($this->fks as $table => $Fks) {
-            if ($Fks == '') {
-                continue;
+            foreach ($this->fks as $table => $Fks) {
+                if ($Fks == '') {
+                    continue;
+                }
+                $this->templateFile = $this->template($Fks);
+                $this->actionCreate(array($name . '_' . $table . 'Fks'));
             }
-            $this->templateFile = $this->template($Fks);
-            $this->actionCreate(array($name . '_' . $table . 'Fks'));
         }
     }
 
@@ -329,7 +329,7 @@ unset($toInsert);
         $character = $this->getCharacterSet($def->name);
         $result = '';
 
-        $result .= '$this->dropTable("' . $def->name . ');' . "\n";
+        $result .= '$this->dropTable("' . $def->name . '");' . "\n";
         return $result;
     }
 
@@ -340,28 +340,26 @@ unset($toInsert);
 
 class {ClassName} extends CDbMigration
 {
-	/*
 	public function up()
 	{
+    	$up
 	}
 
 	public function down()
 	{
-		echo "{ClassName} does not support migration down.\\n";
-		return false;
+    	$down
 	}
-	*/
 
+    /*
     // Use safeUp/safeDown to do migration with transaction
 	public function safeUp()
 	{
-	$up
 	}
 
 	public function safeDown()
 	{
-	$down
 	}
+    */
 }
 EOD;
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'template.php', $file);
