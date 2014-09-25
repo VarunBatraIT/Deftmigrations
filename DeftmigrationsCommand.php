@@ -65,11 +65,20 @@ class DeftmigrationsCommand extends MigrateCommand
             }
         }
         if ($tableName == null) {
-            $All = $this->prompt('Ok so you didn\'t give me table name, should I consider all tables. It may eat up your memory? yes/no ', 'no');
-            $All = trim(strtolower($All));
-            if ($All != 'no' && $All != 'yes') {
-                echo "\nExiting No valid answer is given\n";
-                exit(1);
+
+            if ($this->interactive == true) {
+                $All = $this->prompt('Ok so you didn\'t give me table name, should I consider all tables. It may eat up your memory? yes/no ', 'no');
+                $All = trim(strtolower($All));
+                if ($All != 'no' && $All != 'yes') {
+                    echo "\nExiting No valid answer is given\n";
+                    exit(1);
+                }
+            }
+            else {
+                echo "INFO: Interactive mode DISABLED and no table name provided, generating for all tables\n";
+                echo "INFO: Depending on how many tables you have it may eat up your memory.\n";
+                echo "\n";
+                $tableName = true;
             }
         }
 
@@ -102,7 +111,8 @@ class DeftmigrationsCommand extends MigrateCommand
                 continue;
             }
             $result = $this->getTableStructure($table);
-            $this->templateFile = $this->template($result);
+            $dropResult = $this->getTableStructureDrop($table);
+            $this->templateFile = $this->template($result, $dropResult);
             $this->actionCreate(array($name . '_' . $table->name));
         }
         if (count($this->fks) > 0) {
@@ -313,16 +323,26 @@ unset($toInsert);
         return $result;
     }
 
-    private function template($up = "")
+    private function getTableStructureDrop($def)
+    {
+
+        $character = $this->getCharacterSet($def->name);
+        $result = '';
+
+        $result .= '$this->dropTable("' . $def->name . ');' . "\n";
+        return $result;
+    }
+
+    private function template($up = "", $down = "")
     {
         $file = <<<EOD
 <?php
 
 class {ClassName} extends CDbMigration
 {
+	/*
 	public function up()
 	{
-	$up
 	}
 
 	public function down()
@@ -330,17 +350,18 @@ class {ClassName} extends CDbMigration
 		echo "{ClassName} does not support migration down.\\n";
 		return false;
 	}
+	*/
 
-	/*
-	// Use safeUp/safeDown to do migration with transaction
+    // Use safeUp/safeDown to do migration with transaction
 	public function safeUp()
 	{
+	$up
 	}
 
 	public function safeDown()
 	{
+	$down
 	}
-	*/
 }
 EOD;
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . 'template.php', $file);
